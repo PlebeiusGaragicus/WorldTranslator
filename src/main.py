@@ -64,16 +64,7 @@ def main_page():
 
 
 
-        def translate_article(article_url):
-            article = next((a for a in st.session_state.articles if a['link'] == article_url), None)
-            if article and "scraped" in article:
-                with article_body_placeholders[article_url].container():
-                    st.markdown("### :green[Translation]")
-                    with st.spinner(":green[Translating...]"):
-                        translation = translate(article["scraped"])
-                        st.write(translation)
-
-        article_body_placeholders = {}
+        article_body_placeholders = []
         for article in st.session_state.articles:
                 # article["title"] = translate(article["title"])
                 # article["description"] = translate(article["description"])
@@ -89,24 +80,23 @@ def main_page():
                         st.markdown(scraped)
                         article["scraped"] = scraped
 
-                article_body_placeholders[article['link']] = st.empty()
-                article_body_placeholders[article['link']].button(
-                    "Translate", 
-                    on_click=translate_article, 
-                    args=(article['link'],),
-                    key=article['link']
-                )
+                article_body_placeholders.append( st.empty() )
 
 
-        # for article in st.session_state.articles:
-        #     with article_body_placeholders.pop(0).container():
-        #         st.markdown("### :green[Summary]")
-        #         with st.spinner(":green[Translating summary...]"):
-        #             st.write( translate_stream( article['description']) )
+        for article in st.session_state.articles:
+            # with st.spinner(":green[Translating summary...]"):
+                # st.write( translate_stream(article['description']) )
+            # with st.spinner(":green[Translating article...]"):
+                # st.write( translate_stream( scraped ) )
 
-        #     st.markdown("### :green[Article]")
-        #     with st.spinner(":green[Translating article...]"):
-        #         st.write( translate_stream( article['scraped'] ) )
+            with article_body_placeholders.pop(0).container():
+                st.markdown("### :green[Summary]")
+                with st.spinner(":green[Translating summary...]"):
+                    st.write( translate_stream( article['description']) )
+                
+                st.markdown("### :green[Article]")
+                with st.spinner(":green[Translating article...]"):
+                    st.write( translate_stream( article['scraped'] ) )
 
 
 
