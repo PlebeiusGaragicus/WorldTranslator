@@ -5,40 +5,92 @@ from PIL import Image
 import streamlit as st
 
 from src.common import cprint, Colors
-from src.rss import load_articles
+from src.rss import load_articles, RSS_FEEDS
 from src.translator import translate_stream, translate
 from src.reading import scrape_url
+
+
+## VERSION TWO WILL HAVE A MAP WITH MARKERS FOR EACH COUNTRY WE HAVE AVAILABLE!!
+# https://folium.streamlit.app/dynamic_updates
+
+
 
 
 STATIC_PATH = pathlib.Path(__file__).parent.parent / "static"
 APP_NAME = "World News Translator"
 
-
-
-COUNTIRES = ["🇹🇷 Turkey", "🇩🇪 Germany", "🇪🇸 Spain"]
+TARGET_LANGUAGE = "English"
 
 
 # https://www.sozcu.com.tr/rss-servisleri
-# https://www.sozcu.com.tr/feeds-rss-category-kripto
+# 
 # https://www.spiegel.de/dienste/besser-surfen-auf-spiegel-online-so-funktioniert-rss-a-1040321.html
-RSS_FEEDS = {
-    # "🇺🇸 United States": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-    # "🇬🇧 United Kingdom": "https://feeds.bbci.co.uk/news/world/rss.xml",
-    "🇹🇷 Turkey": "https://www.sozcu.com.tr/feeds-rss-category-kripto",
-    "🇩🇪 Germany": "https://www.spiegel.de/schlagzeilen/tops/index.rss",
-    "🇪🇸 Spain": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"
-}
 
+
+
+
+def show_available_sources():
+    """Display and handle the selection of news sources for the chosen country."""
+    if not st.session_state.country:
+        return
+
+    available_sources = RSS_FEEDS[st.session_state.country]
+    source_names = [source["name"] for source in available_sources]
+
+    st.markdown("### :orange[News sources]")
+    
+    # Initialize selected_sources if not in session state
+    if "selected_sources" not in st.session_state:
+        st.session_state.selected_sources = []
+
+    # Group sources by their main source (before the hyphen)
+    source_groups = {}
+    for name in source_names:
+        main_source = name.split(" - ")[0]
+        if main_source not in source_groups:
+            source_groups[main_source] = []
+        source_groups[main_source].append(name)
+
+    # Create chunks of source groups for 3-column layout
+    MAX_COLUMNS = 3
+    source_groups_items = list(source_groups.items())
+    num_groups = len(source_groups_items)
+    
+    # Calculate number of rows needed
+    num_rows = (num_groups + MAX_COLUMNS - 1) // MAX_COLUMNS
+
+    # Display sources in grid
+    for row in range(num_rows):
+        # Calculate number of columns for this row
+        start_idx = row * MAX_COLUMNS
+        end_idx = min(start_idx + MAX_COLUMNS, num_groups)
+        current_row_items = source_groups_items[start_idx:end_idx]
+        
+        # Create columns for this row
+        cols = st.columns(MAX_COLUMNS)
+        
+        # Display sources in this row
+        for col_idx, (main_source, feeds) in enumerate(current_row_items):
+            with cols[col_idx]:
+                with st.container(border=True):
+                    st.markdown(f"**{main_source}**")
+                    for feed in feeds:
+                        if st.checkbox(
+                            feed.split(" - ")[1],  # Show only the feed type
+                            value=feed in st.session_state.selected_sources,
+                            key=f"source_checkbox_{feed}"
+                        ):
+                            if feed not in st.session_state.selected_sources:
+                                st.session_state.selected_sources.append(feed)
+                        else:
+                            if feed in st.session_state.selected_sources:
+                                st.session_state.selected_sources.remove(feed)
 
 
 
 
 ################################################################################################
 def main_page():
-    # ip_addr = st.context.headers.get('X-Forwarded-For', "?")
-    # user_agent = st.context.headers.get('User-Agent', "?")
-    # lang = st.context.headers.get('Accept-Language', "?")
-    # cprint(f"RUNNING for: {ip_addr} - {lang} - {user_agent}", Colors.YELLOW)
     print(">>> RERUN")
 
 
@@ -62,84 +114,95 @@ def main_page():
         key="max_articles"
     )
 
-    with st.popover("Choose a country" if st.session_state.get("country", None) == None else st.session_state.country):
-        st.radio("Choose a country",
-            options=COUNTIRES,
-            index=None,
-            horizontal=True,
-            key="country",
-            on_change=main_page,
-            label_visibility="collapsed"
+    # with st.popover("Choose a country" if st.session_state.get("country", None) == None else st.session_state.country):
+    st.segmented_control("Choose a country",
+        options=RSS_FEEDS.keys(),
+        default=None,
+        key="country",
+        # on_change=show_available_sources,
+        label_visibility="collapsed"
+    )
+
+    show_available_sources()
+
+    article_placeholder = st.empty()
+
+    # Show selection summary and scrape button
+    if st.session_state.get("selected_sources", None) and st.session_state.selected_sources:
+    # if st.session_state.get("selected_sources", None):
+        st.write(f"Selected {len(st.session_state.selected_sources)} feeds:")
+        for source in st.session_state.selected_sources:
+            st.write(f"- {source}")
+
+        st.button(
+            "Scrape Articles",
+            help="Fetch articles from selected news sources",
+            type="primary",
+            use_container_width=True,
+            on_click=do_the_thing,
+            args=(article_placeholder,)
         )
-
-    if st.session_state.country:
-        do_the_thing()
-
-
-
-
-
-################################################################################################
-def do_the_thing():
-    selected_country = st.session_state.country
-    feed_url = RSS_FEEDS[selected_country]
-    articles = load_articles(feed_url, max_articles=st.session_state.max_articles)
-    st.session_state.articles = articles
-    st.popover("Articles:", icon="📖").write(st.session_state.articles)
-
-
-
-    # This will hold the article body placeholders, that will be translated AFTER each article's title is displayed
-    article_body_placeholders = []
-
-    # First we translate and display the titles for each article
-    for article in st.session_state.articles:
-        with st.container(border=True):
-            with st.spinner(":green[Scraping...]"):
-                title = translate(article['title'])
-                st.markdown(f"### :blue[{title}]")
-
-                with st.popover("Origional content:", icon="📖"):
-                    st.write(f"[Link to article]({article['link']})")
-                    scraped = scrape_url( article['link'] )
-                    st.markdown(scraped)
-                    article["scraped"] = scraped
-
-            article_body_placeholders.append( st.empty() )
-
-
-    # Now we translate and display the bodies for each article
-    for article in st.session_state.articles:
-
-        with article_body_placeholders.pop(0).container():
-            # skip_button = st.empty()
-
-            # if skip_button.button("Skip", on_click=main_page, key=article['link']):
-            #     skip_button.empty()
-            #     continue
-
-            st.markdown("### :green[Summary]")
-            with st.spinner(":green[Translating summary...]"):
-                st.write( translate_stream( article['description']) )
-            
-            st.markdown("### :green[Article]")
-            with st.spinner(":green[Translating article...]"):
-                st.write( translate_stream( article['scraped'] ) )
+    else:
+        st.info("Please select at least one news feed")
 
 
 
 
     if os.getenv("DEBUG"):
         with st.popover(":orange[DEBUG]"):
-            st.write(st.session_state.articles)
+            st.write("## articles")
+            st.write(st.session_state.get("articles", None))
+            st.divider()
             st.write(st.secrets)
             st.write( st.session_state )
             st.write( st.context.cookies )
             st.write( st.context.headers )
+################################################################################################
 
 
 
 
+
+
+
+
+################################################################################################
+def do_the_thing(article_placeholder):
+    with article_placeholder.container():
+        selected_country = st.session_state.country
+        selected_sources = st.session_state.selected_sources
+        feed_urls = [source["url"] for source in RSS_FEEDS[selected_country] if source["name"] in selected_sources]
+        articles = load_articles(feed_urls, max_articles=st.session_state.max_articles)
+        st.session_state.articles = articles
+
+        # Display articles in a clean, organized way
+        for article in st.session_state.articles:
+            with st.container(border=True):
+                # Translate and display the title
+                with st.spinner(":green[Translating title...]"):
+                    title = translate(article['title'])
+                    st.markdown(f"### :blue[{title}]")
+
+                # Show original content in a popover
+                with st.popover("Original content:", icon="📖"):
+                    st.write(f"[Link to article]({article['link']})")
+                    st.write("Original title:", article['title'])
+                    st.write("Original description:", article['description'])
+
+                # Add a button to scrape and translate the full article
+                if st.button("Translate Full Article", key=f"translate_{article['link']}"):
+                    with st.spinner(":green[Scraping article...]"):
+                        scraped = scrape_url(article['link'])
+                        article["scraped"] = scraped
+
+                    st.markdown("### :green[Summary]")
+                    with st.spinner(":green[Translating summary...]"):
+                        st.write(translate_stream(article['description']))
+                    
+                    if article.get("scraped"):
+                        st.markdown("### :green[Article]")
+                        with st.spinner(":green[Translating article...]"):
+                            st.write(translate_stream(article['scraped']))
 
 
 
