@@ -13,7 +13,7 @@ INSTRUCTIONS = """
 
 ---
 
-Translate the above into English.
+Translate the above into English.  Provide only ONE version of the translation.
 
 Clean up formatting, if needed.  Ensure proper whitespace and punctuation.  Remove all markdown/rich text formatting.
 
@@ -34,7 +34,7 @@ def translate_stream(text):
     llm = ChatOllama(
         model=MODEL,
         keep_alive="5m",
-        # temperature=0.7,
+        temperature=0.4,
         base_url=OLLAMA_HOST,
     )
 
