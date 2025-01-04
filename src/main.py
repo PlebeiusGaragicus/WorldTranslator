@@ -228,7 +228,11 @@ def show_articles():
     # Group articles by country
     articles_by_country = {}
     for url, data in filtered_articles.items():
-        country = data["source"].split("_")[0].upper()  # Assuming source format is "country_name"
+        # Find the matching country from RSS_FEEDS
+        for country_key in RSS_FEEDS.keys():
+            if any(source["name"] == data["source"] for source in RSS_FEEDS[country_key]):
+                country = country_key
+                break
         if country not in articles_by_country:
             articles_by_country[country] = []
         articles_by_country[country].append((url, data))
@@ -236,6 +240,7 @@ def show_articles():
     # Create tabs for each country
     if articles_by_country:
         countries = sorted(articles_by_country.keys())
+        # Create tabs with flags (flags are already included in the country keys)
         tabs = st.tabs(countries)
 
         # Display articles for each country in their respective tabs
