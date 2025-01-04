@@ -1,6 +1,7 @@
 import os
 import pathlib
 from PIL import Image
+from datetime import datetime
 
 import streamlit as st
 
@@ -102,6 +103,10 @@ def main_page():
         initial_sidebar_state="collapsed",
     )
 
+    # Global storage for scraped articles
+    if "all_scraped_articles" not in st.session_state:
+        st.session_state.all_scraped_articles = {}  # {url: {"article": article_data, "timestamp": datetime, "source": source}}
+
 
     st.header("🗺️ :blue[World] :red[News]:green[Translator]", divider="rainbow")
 
@@ -130,23 +135,26 @@ def main_page():
     # Show selection summary and scrape button
     if st.session_state.get("selected_sources", None) and st.session_state.selected_sources:
     # if st.session_state.get("selected_sources", None):
-        st.write(f"Selected {len(st.session_state.selected_sources)} feeds:")
-        for source in st.session_state.selected_sources:
-            st.write(f"- {source}")
+        # st.write(f"Selected {len(st.session_state.selected_sources)} feeds:")
+        # for source in st.session_state.selected_sources:
+            # st.write(f"- {source}")
 
         st.button(
             "Scrape Articles",
             help="Fetch articles from selected news sources",
             type="primary",
-            use_container_width=True,
-            on_click=do_the_thing,
+            # use_container_width=True,
+            on_click=scrape_articles,
             args=(article_placeholder,)
         )
     else:
         st.info("Please select at least one news feed")
 
+    st.header("", divider="rainbow")
 
 
+    # Show articles from memory and new scrapes
+    show_articles()
 
     if os.getenv("DEBUG"):
         with st.popover(":orange[DEBUG]"):
@@ -167,65 +175,94 @@ def main_page():
 
 
 ################################################################################################
-def do_the_thing(article_placeholder):
+def scrape_articles(article_placeholder):
     with article_placeholder.container():
         selected_country = st.session_state.country
         selected_sources = st.session_state.selected_sources
         feed_urls = [source["url"] for source in RSS_FEEDS[selected_country] if source["name"] in selected_sources]
+        
+        # st.write("Debug - Selected sources:", selected_sources)
+        # st.write("Debug - Feed URLs:", feed_urls)
+        
         articles = load_articles(feed_urls, max_articles=st.session_state.max_articles)
-        st.session_state.articles = articles
+        
+        # Store articles in persistent storage with timestamp
+        for article in articles:
+            if article['link'] not in st.session_state.all_scraped_articles:
+                # Find matching source name from the feed URL
+                source_name = next(
+                    (source["name"] for source in RSS_FEEDS[selected_country] 
+                     if source["url"] == article.get("source")),  "Unknown Source"
+                )
 
-        # Display articles in a clean, organized way
-        for article in st.session_state.articles:
-            with st.container(border=True):
-                # Translate and display the title
-                with st.spinner(":green[Translating title...]"):
-                    title = translate(article['title'])
-                    st.markdown(f"### :blue[{title}]")
+                st.session_state.all_scraped_articles[article['link']] = {
+                    "article": article,
+                    "timestamp": datetime.now(),
+                    "source": source_name
+                }
 
-                # Show original content in a popover
-                with st.popover("Original content:", icon="📖"):
-                    st.write(f"[Link to article]({article['link']})")
-                    st.write("Original title:", article['title'])
-                    st.write("Original description:", article['description'])
+                st.write(f"Debug - Stored article with source: {source_name}")
 
-                # Add a button to scrape and translate the full article
-                if st.button("Translate Full Article", key=f"translate_{article['link']}"):
-                    with st.spinner(":green[Scraping article...]"):
-                        scraped = scrape_url(article['link'])
-                        article["scraped"] = scraped
+def show_articles():
+    # Filter articles based on selected sources
+    selected_sources = st.session_state.get("selected_sources", [])
+    
+    if not st.session_state.all_scraped_articles:
+        st.info("No articles have been scraped yet. Select sources and click 'Scrape Articles' to begin.")
+        return
+    # else:
+        # st.write(f"Found {len(st.session_state.all_scraped_articles)} articles in memory.")
+        # if selected_sources:
+        #     st.write("Selected sources:", selected_sources)
 
-                    st.markdown("### :green[Summary]")
-                    with st.spinner(":green[Translating summary...]"):
-                        st.write(translate_stream(article['description']))
-                    
-                    if article.get("scraped"):
-                        st.markdown("### :green[Article]")
-                        with st.spinner(":green[Translating article...]"):
-                            st.write(translate_stream(article['scraped']))
+    # Filter articles based on selected sources
+    filtered_articles = {
+        url: data for url, data in st.session_state.all_scraped_articles.items()
+        if not selected_sources or data["source"] in selected_sources
+    }
 
+    if not filtered_articles:
+        st.warning("No articles match the currently selected sources. Try selecting different sources or scraping new articles.")
+        return
 
+    # Group articles by country
+    articles_by_country = {}
+    for url, data in filtered_articles.items():
+        country = data["source"].split("_")[0].upper()  # Assuming source format is "country_name"
+        if country not in articles_by_country:
+            articles_by_country[country] = []
+        articles_by_country[country].append((url, data))
 
-# def translate_article(article_url):
-#     article = next((a for a in st.session_state.articles if a['link'] == article_url), None)
-#     if article and "scraped" in article:
-#         with article_body_placeholders[article_url].container():
-#             st.markdown("### :green[Translation]")
-#             with st.spinner(":green[Translating...]"):
-#                 translation = translate(article["scraped"])
-#                 st.write(translation)
+    # Create tabs for each country
+    if articles_by_country:
+        countries = sorted(articles_by_country.keys())
+        tabs = st.tabs(countries)
 
+        # Display articles for each country in their respective tabs
+        for country, tab in zip(countries, tabs):
+            with tab:
+                # st.markdown(f"## Articles from {country}")
+                for url, data in articles_by_country[country]:
+                    article = data["article"]
+                    with st.container(border=True):
+                        # Translate and display the title
+                        with st.spinner(":green[Translating title...]"):
+                            title = translate(article['title'])
+                            st.markdown(f"### :blue[{title}]")
+                            st.caption(f"Source: {data['source']} | Scraped: {data['timestamp']}")
 
+                        # Show original content in a popover
+                        with st.popover("Original content:", icon="📖"):
+                            st.write(f"[Link to article]({article['link']})")
+                            st.write("Original title:", article['title'])
+                            st.write("Original description:", article['description'])
 
-# article_body_placeholders = {}
-# for article in st.session_state.articles:
+                        # Add a button to scrape and translate the full article
+                        if st.button("Translate Full Article", key=f"translate_{article['link']}"):
+                            with st.spinner(":green[Scraping article...]"):
+                                scraped = scrape_url(article['link'])
+                                article["scraped"] = scraped
 
-# ...
-
-#         article_body_placeholders[article['link']] = st.empty()
-#         article_body_placeholders[article['link']].button(
-#             "Translate", 
-#             on_click=translate_article, 
-#             args=(article['link'],),
-#             key=article['link']
-#         )
+                            st.markdown("### :green[Summary]")
+                            if article.get("scraped"):
+                                translate_stream(article["scraped"])
