@@ -1,10 +1,7 @@
 import os
-import pathlib
-from PIL import Image
+
 
 import streamlit as st
-
-STATIC_PATH = pathlib.Path(__file__).parent.parent / "static"
 
 
 

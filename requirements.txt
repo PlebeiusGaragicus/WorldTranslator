@@ -1,1 +1,6 @@
 streamlit
+feedparser
+lxml_html_clean
+readability-lxml
+langchain
+langchain_ollama
