@@ -10,53 +10,53 @@ COUNTIRES = ["🇹🇷 Turkey", "🇩🇪 Germany", "🇪🇸 Spain"]
 
 RSS_FEEDS = {
     "🇹🇷 Turkey": [
-        {"name": "Hurriyet - Main", "url": "https://www.hurriyet.com.tr/rss/anasayfa"},
-        {"name": "Sozcu - Economy broken", "url": "https://www.sozcu.com.tr/rss/ekonomi.xml"},
-        {"name": "Sozcu - World broken", "url": "https://www.sozcu.com.tr/rss/dunya.xml"},
-        {"name": "Sozcu - Technology broken", "url": "https://www.sozcu.com.tr/rss/teknoloji.xml"},
-        {"name": "Sozcu - Sports broken", "url": "https://www.sozcu.com.tr/rss/spor.xml"},
-        {"name": "Hurriyet - Economy", "url": "https://www.hurriyet.com.tr/rss/ekonomi"},
-        {"name": "Hurriyet - World", "url": "https://www.hurriyet.com.tr/rss/dunya"},
-        {"name": "Hurriyet - Technology", "url": "https://www.hurriyet.com.tr/rss/teknoloji"},
-        {"name": "Hurriyet - Sports", "url": "https://www.hurriyet.com.tr/rss/spor"},
-        {"name": "Cumhuriyet - Main", "url": "https://www.cumhuriyet.com.tr/rss/son_dakika.xml"},
-        {"name": "Cumhuriyet - World", "url": "https://www.cumhuriyet.com.tr/rss/dunya"},
-        {"name": "Cumhuriyet - Economy", "url": "https://www.cumhuriyet.com.tr/rss/ekonomi"},
-        {"name": "Cumhuriyet - Politics", "url": "https://www.cumhuriyet.com.tr/rss/siyaset"},
+        {"Source": "Sozcu", "feed_name": "Economy", "url": "https://www.sozcu.com.tr/rss/ekonomi.xml"},
+        {"Source": "Sozcu", "feed_name": "World", "url": "https://www.sozcu.com.tr/rss/dunya.xml"},
+        {"Source": "Sozcu", "feed_name": "Technology", "url": "https://www.sozcu.com.tr/rss/teknoloji.xml"},
+        {"Source": "Sozcu", "feed_name": "Sports", "url": "https://www.sozcu.com.tr/rss/spor.xml"},
+        {"Source": "Hurriyet", "feed_name": "Main", "url": "https://www.hurriyet.com.tr/rss/anasayfa"},
+        {"Source": "Hurriyet", "feed_name": "Economy", "url": "https://www.hurriyet.com.tr/rss/ekonomi"},
+        {"Source": "Hurriyet", "feed_name": "World", "url": "https://www.hurriyet.com.tr/rss/dunya"},
+        {"Source": "Hurriyet", "feed_name": "Technology", "url": "https://www.hurriyet.com.tr/rss/teknoloji"},
+        {"Source": "Hurriyet", "feed_name": "Sports", "url": "https://www.hurriyet.com.tr/rss/spor"},
+        {"Source": "Cumhuriyet", "feed_name": "Main", "url": "https://www.cumhuriyet.com.tr/rss/son_dakika.xml"},
+        {"Source": "Cumhuriyet", "feed_name": "World", "url": "https://www.cumhuriyet.com.tr/rss/dunya"},
+        {"Source": "Cumhuriyet", "feed_name": "Economy", "url": "https://www.cumhuriyet.com.tr/rss/ekonomi"},
+        {"Source": "Cumhuriyet", "feed_name": "Politics", "url": "https://www.cumhuriyet.com.tr/rss/siyaset"},
+        {"Source": "Der Spiegel", "feed_name": "Main", "url": "https://www.spiegel.de/schlagzeilen/tops/index.rss"},
     ],
     "🇩🇪 Germany": [
-        {"name": "Der Spiegel - Main", "url": "https://www.spiegel.de/schlagzeilen/tops/index.rss"},
-        {"name": "Der Spiegel - International", "url": "https://www.spiegel.de/ausland/index.rss"},
-        {"name": "Der Spiegel - Politics", "url": "https://www.spiegel.de/politik/index.rss"},
-        {"name": "Der Spiegel - Economy", "url": "https://www.spiegel.de/wirtschaft/index.rss"},
-        {"name": "Der Spiegel - Science", "url": "https://www.spiegel.de/wissenschaft/index.rss"},
-        {"name": "FAZ - Main", "url": "https://www.faz.net/rss/aktuell"},
-        {"name": "FAZ - Politics", "url": "https://www.faz.net/rss/aktuell/politik"},
-        {"name": "FAZ - Economy", "url": "https://www.faz.net/rss/aktuell/wirtschaft"},
-        {"name": "FAZ - Finance", "url": "https://www.faz.net/rss/aktuell/finanzen"},
-        {"name": "FAZ - Society", "url": "https://www.faz.net/rss/aktuell/gesellschaft"},
-        {"name": "Deutsche Welle - Main", "url": "https://rss.dw.com/rdf/rss-de-all"},
-        {"name": "Deutsche Welle - Germany", "url": "https://rss.dw.com/rdf/rss-de-ger"},
-        {"name": "Deutsche Welle - Europe", "url": "https://rss.dw.com/rdf/rss-de-eu"},
-        {"name": "Deutsche Welle - Business", "url": "https://rss.dw.com/rdf/rss-de-eco"},
-        {"name": "Deutsche Welle - Culture", "url": "https://rss.dw.com/rdf/rss-de-cul"}
+        {"Source": "Der Spiegel", "feed_name": "International", "url": "https://www.spiegel.de/ausland/index.rss"},
+        {"Source": "Der Spiegel", "feed_name": "Politics", "url": "https://www.spiegel.de/politik/index.rss"},
+        {"Source": "Der Spiegel", "feed_name": "Economy", "url": "https://www.spiegel.de/wirtschaft/index.rss"},
+        {"Source": "Der Spiegel", "feed_name": "Science", "url": "https://www.spiegel.de/wissenschaft/index.rss"},
+        {"Source": "FAZ", "feed_name": "Main", "url": "https://www.faz.net/rss/aktuell"},
+        {"Source": "FAZ", "feed_name": "Politics", "url": "https://www.faz.net/rss/aktuell/politik"},
+        {"Source": "FAZ", "feed_name": "Economy", "url": "https://www.faz.net/rss/aktuell/wirtschaft"},
+        {"Source": "FAZ", "feed_name": "Finance", "url": "https://www.faz.net/rss/aktuell/finanzen"},
+        {"Source": "FAZ", "feed_name": "Society", "url": "https://www.faz.net/rss/aktuell/gesellschaft"},
+        {"Source": "Deutsche Welle", "feed_name": "Main", "url": "https://rss.dw.com/rdf/rss-de-all"},
+        {"Source": "Deutsche Welle", "feed_name": "Germany", "url": "https://rss.dw.com/rdf/rss-de-ger"},
+        {"Source": "Deutsche Welle", "feed_name": "Europe", "url": "https://rss.dw.com/rdf/rss-de-eu"},
+        {"Source": "Deutsche Welle", "feed_name": "Business", "url": "https://rss.dw.com/rdf/rss-de-eco"},
+        {"Source": "Deutsche Welle", "feed_name": "Culture", "url": "https://rss.dw.com/rdf/rss-de-cul"}
     ],
     "🇪🇸 Spain": [
-        {"name": "El País - Main", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"},
-        {"name": "El País - International", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada"},
-        {"name": "El País - Economy", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada"},
-        {"name": "El País - Technology", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada"},
-        {"name": "El País - Culture", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada"},
-        {"name": "El Mundo - Main", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml"},
-        {"name": "El Mundo - International", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/internacional.xml"},
-        {"name": "El Mundo - Economy", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/economia.xml"},
-        {"name": "El Mundo - Sports", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/deportes.xml"},
-        {"name": "El Mundo - Culture", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/cultura.xml"},
-        {"name": "ABC - Main", "url": "https://www.abc.es/rss/feeds/abc_EspanaEspana.xml"},
-        {"name": "ABC - International", "url": "https://www.abc.es/rss/feeds/abc_Internacional.xml"},
-        {"name": "ABC - Economy", "url": "https://www.abc.es/rss/feeds/abc_Economia.xml"},
-        {"name": "ABC - Culture", "url": "https://www.abc.es/rss/feeds/abc_Cultura.xml"},
-        {"name": "ABC - Science", "url": "https://www.abc.es/rss/feeds/abc_Ciencia.xml"}
+        {"Source": "El País", "feed_name": "Main", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"},
+        {"Source": "El País", "feed_name": "International", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada"},
+        {"Source": "El País", "feed_name": "Economy", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada"},
+        {"Source": "El País", "feed_name": "Technology", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada"},
+        {"Source": "El País", "feed_name": "Culture", "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada"},
+        {"Source": "El Mundo", "feed_name": "Main", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml"},
+        {"Source": "El Mundo", "feed_name": "International", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/internacional.xml"},
+        {"Source": "El Mundo", "feed_name": "Economy", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/economia.xml"},
+        {"Source": "El Mundo", "feed_name": "Sports", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/deportes.xml"},
+        {"Source": "El Mundo", "feed_name": "Culture", "url": "https://e00-elmundo.uecdn.es/elmundo/rss/cultura.xml"},
+        {"Source": "ABC", "feed_name": "Main", "url": "https://www.abc.es/rss/feeds/abc_EspanaEspana.xml"},
+        {"Source": "ABC", "feed_name": "International", "url": "https://www.abc.es/rss/feeds/abc_Internacional.xml"},
+        {"Source": "ABC", "feed_name": "Economy", "url": "https://www.abc.es/rss/feeds/abc_Economia.xml"},
+        {"Source": "ABC", "feed_name": "Culture", "url": "https://www.abc.es/rss/feeds/abc_Cultura.xml"},
+        {"Source": "ABC", "feed_name": "Science", "url": "https://www.abc.es/rss/feeds/abc_Ciencia.xml"}
     ]
 }
 
@@ -84,7 +84,7 @@ def load_articles(feed_urls: List[str], max_articles: Optional[int] = None) -> L
 
             # Handle 404s with a subtle toast
             if response.status_code == 404:
-                feed_name = next((source["name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
+                feed_name = next((source["Source"] + " - " + source["feed_name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
                 st.toast(f"`{feed_name}` is currently unavailable", icon="⚠️")
                 continue
 
@@ -104,7 +104,7 @@ def load_articles(feed_urls: List[str], max_articles: Optional[int] = None) -> L
             
             if feed.bozo and feed.bozo_exception:
                 error_count += 1
-                feed_name = next((source["name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
+                feed_name = next((source["Source"] + " - " + source["feed_name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
                 st.toast(f"⚠️ Error parsing {feed_name}", icon="⚠️")
                 # Try parsing the URL directly as a fallback
                 feed = feedparser.parse(feed_url)
@@ -136,13 +136,13 @@ def load_articles(feed_urls: List[str], max_articles: Optional[int] = None) -> L
                 
         except requests.RequestException as e:
             error_count += 1
-            feed_name = next((source["name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
+            feed_name = next((source["Source"] + " - " + source["feed_name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
             if not (isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 404):
                 st.toast(f"🔴 Network error loading {feed_name}", icon="🔴")
             continue
         except Exception as e:
             error_count += 1
-            feed_name = next((source["name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
+            feed_name = next((source["Source"] + " - " + source["feed_name"] for source in RSS_FEEDS[st.session_state.country] if source["url"] == feed_url), feed_url)
             st.toast(f"🔴 Error loading {feed_name}: {str(e)}", icon="🔴")
             continue
     

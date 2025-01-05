@@ -13,11 +13,13 @@ INSTRUCTIONS = """
 
 ---
 
-Translate the above into English.  Provide only ONE version of the translation.
+INSTRUCTIONS:
 
-Clean up formatting, if needed.  Ensure proper whitespace and punctuation.  Remove all markdown/rich text formatting.
+1. Translate the above into English.  Provide only ONE version of the translation.
 
-Provide ONLY the cleaned and translated text - do not include any other information, cavets, warnings or explanations.
+2. Clean up formatting, if needed.  Ensure proper whitespace and punctuation.  Remove all HTML / markdown / rich-text formatting.
+
+3. Provide ONLY the cleaned and translated text - do not include any other information, cavets, warnings or explanations.
 """
 
 
