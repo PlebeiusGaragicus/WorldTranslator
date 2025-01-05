@@ -22,6 +22,9 @@ APP_NAME = "World News Translator"
 
 TARGET_LANGUAGE = "English"
 
+INITIAL_VISIBLE_ARTICLES = 8
+SHOW_MORE_BUTTON_COUNT = 4
+
 
 # https://www.sozcu.com.tr/rss-servisleri
 # 
@@ -67,7 +70,10 @@ def main_page():
     # Display each country's feeds in a container
     for idx, country in enumerate(countries):
         with cols[idx % 3]:
-            with st.expander(country):
+            color = "grey"
+            if st.session_state.selected_feed and st.session_state.selected_feed[0] == country:
+                color = "orange"
+            with st.expander(f":{color}[{country}]"):
                 # st.subheader(country)
 
                 # Group feeds by feed_name for this country
@@ -85,10 +91,12 @@ def main_page():
                 # Create vertical buttons for each feed
                 for feed_name, feeds in sorted_sources:
                     if st.button(
-                        f"📰 {feed_name}",
+                        # f"📰 {feed_name}",
+                        f"{feed_name}",
                         key=f"btn_{country}_{feed_name}",
-                        type="primary" if st.session_state.selected_feed == (country, feed_name) else "secondary",
-                        use_container_width=True
+                        icon="🔴" if st.session_state.selected_feed == (country, feed_name) else "⭕️",
+                        type="primary" if st.session_state.selected_feed == (country, feed_name) else "tertiary",
+                        # use_container_width=True
                     ):
                         # Update global selection
                         st.session_state.selected_feed = (country, feed_name)
@@ -116,7 +124,8 @@ def main_page():
             st.session_state.selected_sources[country] = set()
         st.session_state.selected_sources[country].add(feed_name)
 
-    show_articles()
+    with st.spinner("Displaying articles..."):
+        show_articles()
 
 
 
@@ -141,77 +150,6 @@ def main_page():
 
 
 
-
-
-def show_available_sources():
-    """
-    This displays the available sources for the currently selected country and manages their selection state.
-    Sources are displayed in a grid with exactly 3 columns per row, each taking 1/3rd of the width.
-    Source groups are sorted by number of feeds, with largest groups first.
-    """
-    
-    if not st.session_state.get("country"):
-        return
-
-    selected_country = st.session_state.country
-    
-    # Get all sources for this country
-    country_feeds = [feed for feed in RSS_FEEDS if feed["country"] == selected_country]
-    
-    # Group feeds by feed_name
-    sources = {}
-    for feed in country_feeds:
-        feed_name = feed['feed_name']
-        if feed_name not in sources:
-            sources[feed_name] = []
-        sources[feed_name].append(feed)
-    
-    # Sort sources by number of feeds (largest first)
-    sorted_sources = sorted(sources.items(), key=lambda x: len(x[1]), reverse=True)
-
-    # Initialize selected sources for this country if not exists
-    if selected_country not in st.session_state.selected_sources:
-        st.session_state.selected_sources[selected_country] = set()
-
-    # Create a single list of sources
-    for feed_name, feeds in sorted_sources:
-        # Create a container for each source
-        # with st.container(border=True):
-        # Create display names for each feed
-        feed_names = [feed['feed_name'] for feed in feeds]
-        
-        # Add source selection toggle
-        for name in feed_names:
-            selected = st.toggle(
-                name,
-                value=name in st.session_state.selected_sources[selected_country],
-                key=f"source_{selected_country}_{name}"
-            )
-            
-            # Update selected sources
-            if selected:
-                st.session_state.selected_sources[selected_country].add(name)
-            else:
-                st.session_state.selected_sources[selected_country].discard(name)
-
-
-# def show_settings():
-#     # auto-translate toggle
-#     st.toggle(
-#         ":blue[Auto-Translate]",
-#         key="auto_translate",
-#         value=st.session_state.get("auto_translate", False)
-#     )
-
-#     # Number of articles to scrape per source
-#     st.number_input(
-#         ":red[Number of articles to scrape per source]",
-#         min_value=1,
-#         max_value=20,
-#         value=st.session_state.get("max_articles", 5),
-#         step=1,
-#         key="max_articles"
-#     )
 
 
 def show_articles():
@@ -257,11 +195,20 @@ def show_articles():
     # Set the current articles to this feed's articles
     st.session_state.articles = st.session_state.articles_by_feed[feed_url]
         
+    # Initialize visible_count dictionary if not exists
+    if 'visible_count_by_feed' not in st.session_state:
+        st.session_state.visible_count_by_feed = {}
+    
+    # Initialize visible_count for this feed if not exists
+    if feed_url not in st.session_state.visible_count_by_feed:
+        st.session_state.visible_count_by_feed[feed_url] = INITIAL_VISIBLE_ARTICLES
+
     # Load new articles for selected source
     current_time = datetime.now()
     try:
         # new_articles = load_articles(feed_url, max_articles=st.session_state.get("max_articles", 5))
-        new_articles = load_articles(feed_url, max_articles=20)
+        # new_articles = load_articles(feed_url, max_articles=20)
+        new_articles = load_articles(feed_url)
     except Exception as e:
         st.error(f"Failed to load articles: {str(e)}")
         return
@@ -280,7 +227,8 @@ def show_articles():
             'scrape_time': current_time,
             'translated_title': None,
             'content': None,
-            'translated': None
+            'translated': None,
+            'visible': False  # Initially set to False
         })
         st.session_state.articles[article_url] = article
         # Also update the articles_by_feed dictionary
@@ -288,14 +236,20 @@ def show_articles():
 
     # Get all articles and sort by published date (newest first)
     all_articles = sorted(
-        st.session_state.articles.values(),
-        key=lambda x: x.get('published', ''),
+        st.session_state.articles.items(),
+        key=lambda x: x[1]['published'],
         reverse=True
     )
 
-    # Display articles
-    for article in all_articles:
-        article_url = article['link']
+    # Mark the first N articles as visible
+    for i, (article_url, article) in enumerate(all_articles):
+        if i < st.session_state.visible_count_by_feed[feed_url]:
+            article['visible'] = True
+
+    # Display only visible articles
+    for article_url, article in all_articles:
+        if not article['visible']:
+            continue
 
         with st.container(border=True):
 
@@ -325,18 +279,52 @@ def show_articles():
 
                 st.caption(article['content'])
 
-            if article['translated'] is None:
-                # if st.session_state.get("auto_translate", False):
-                #     with st.spinner(":green[Translating...]"):
-                #         article['translated'] = st.write_stream(translate_stream(article['content']))
+            translate_button(article, article_url)
 
-                # else:
-                if st.button(":rainbow[Translate Article]", icon="🗣️", key=f"translate_{article['source']}{article_url}"):
-                    with st.spinner(":green[Translating...]"):
-                        article['translated'] = st.write_stream(translate_stream(article['content']))
-                        st.rerun()
+    # Add "See more" button at the bottom if there are more articles to show
+    # if len(all_articles) > st.session_state.visible_count_by_feed[feed_url]:
+    #     if st.button("See more"):
+    #         next_article_index = st.session_state.visible_count_by_feed[feed_url]
+    #         all_articles[next_article_index][1]['visible'] = True
+    #         st.session_state.visible_count_by_feed[feed_url] += 1
+    #         st.rerun()
 
-            else:
-                # with st.container(border=True):
-                st.markdown("### :orange[Translated Content]")
-                st.write(article['translated'])
+    # Add "See more" button at the bottom if there are more articles to show
+    if len(all_articles) > st.session_state.visible_count_by_feed[feed_url]:
+        st.button(":blue[Keep scrolling...]", icon="😉", use_container_width=True, type="tertiary", on_click=show_more, args=(feed_url,all_articles))
+        # if st.button(":blue[Keep scrolling...]", icon="😉", use_container_width=True, type="tertiary", onclick=show_more):
+            # with st.spinner("Loading..."):
+            #     st.session_state.visible_count_by_feed[feed_url] += 3
+            #     # Mark next batch of articles as visible
+            #     for i, (article_url, article) in enumerate(all_articles):
+            #         if i < st.session_state.visible_count_by_feed[feed_url]:
+            #             article['visible'] = True
+            # st.rerun()
+
+def show_more(feed_url, all_articles):
+    with st.spinner("Loading..."):
+        st.session_state.visible_count_by_feed[feed_url] += SHOW_MORE_BUTTON_COUNT
+        # Mark next batch of articles as visible
+        for i, (article_url, article) in enumerate(all_articles):
+            if i < st.session_state.visible_count_by_feed[feed_url]:
+                article['visible'] = True
+
+
+
+@st.fragment
+def translate_button(article, article_url):
+    if article['translated'] is None:
+        # if st.session_state.get("auto_translate", False):
+        #     with st.spinner(":green[Translating...]"):
+        #         article['translated'] = st.write_stream(translate_stream(article['content']))
+
+        # else:
+        if st.button(":rainbow[Translate Article]", icon="🗣️", key=f"translate_{article['source']}{article_url}"):
+            with st.spinner(":green[Translating...]"):
+                article['translated'] = st.write_stream(translate_stream(article['content']))
+                # st.rerun()
+
+    else:
+        # with st.container(border=True):
+        st.markdown("### :orange[Translated Content]")
+        st.write(article['translated'])
