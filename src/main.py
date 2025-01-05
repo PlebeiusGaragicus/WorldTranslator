@@ -38,7 +38,8 @@ def main_page():
         page_title=APP_NAME,
         page_icon=favicon,
         layout="wide",
-        initial_sidebar_state="expanded" if os.getenv("DEBUG", False) else "collapsed"
+        # initial_sidebar_state="expanded" if os.getenv("DEBUG", False) else "collapsed"
+        initial_sidebar_state="collapsed"
     )
 
     # Global storage for scraped articles
@@ -296,7 +297,7 @@ def show_articles():
                 if not source_articles:
                     st.info(f"No articles found for {source_name}")
                     continue
-                
+
                 # Sort articles by published date (newest first)
                 source_articles.sort(key=lambda x: x.get('published', ''), reverse=True)
                 
@@ -308,23 +309,31 @@ def show_articles():
                         st.markdown(f"**Published:** {article.get('published', 'Unknown date')}")
                         # st.markdown(f"**Source:** {source_name}")
                         st.caption(article.get('description', 'No description available'))
-                        with st.popover("Original Content"):
-                            st.markdown(f"[Link to full article]({article['link']})")
+                        st.markdown(f"[Link to full article]({article['link']})")
+
+                        # cols2 = st.columns(2)
+
+                    # with cols2[1]:
+                        # with st.container(border=True):
+                        with st.popover(":grey[Original Content]"):
+                            st.markdown("### :grey[Original Content]")
                             # if we haven't scraped the content yet, scrape it
                             if article.get('content', None) is None:
                                 content = scrape_url(article['link'])
                                 article['content'] = content
-                                st.write(article['content'])
-
                                 article['translated'] = None
-                            # Scrape and store the content in memory
 
+                            st.caption(article['content'])
+
+                    # with cols2[0]:
                         if article['translated'] is None:
-                            if st.button("Translate Article", key=f"translate_{article['link']}"):
+                            if st.button(":rainbow[Translate Article]", icon="🗣️", key=f"translate_{article['link']}"):
                                 with st.spinner(":green[Translating...]"):
                                     # article['translated'] = translate(article['content'])
                                     article['translated'] = st.write_stream( translate_stream(article['content']) )
                                     st.rerun()
 
                         else:
-                            st.write(article['translated'])
+                            with st.container(border=True):
+                                st.markdown("### :green[Translated Content]")
+                                st.write(article['translated'])
