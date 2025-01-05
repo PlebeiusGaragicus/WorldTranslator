@@ -12,19 +12,17 @@ INSTRUCTIONS = """
 
 ---
 
-INSTRUCTIONS:
-
-1. Translate the above into English:
-  - Provide only ONE version of the translation.
-
-2. Clean up formatting, grammar and punctuation:
-  - Remove all HTML / markdown / rich-text formatting.
-  - Ensure proper whitespace and punctuation.
-
-3. Do not act like a chatbot:
-  - Provide ONLY the cleaned and translated text
-  - Do not include any other information, cavets, warnings or explanations.
+Translate the above into English.  Provide ONLY the translated text.
 """
+#   - Provide only ONE version of the translation.
+
+# 2. Clean up formatting, grammar and punctuation:
+#   - Remove all HTML / markdown / rich-text formatting.
+#   - Ensure proper whitespace and punctuation.
+
+# 3. Do not act like a chatbot:
+#   - Provide ONLY the cleaned and translated text
+#   - Do not include any other information, cavets, warnings or explanations.
 
 
 @st.cache_data(ttl=3600)
