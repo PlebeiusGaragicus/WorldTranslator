@@ -51,22 +51,3 @@ def translate_stream(text):
 
     # return response.content
     return response
-
-
-# @st.cache_data(ttl=3600)
-# def translate_and_summarize(text):
-#     print(f"Summarizing: {text}")
-
-#     llm = ChatOllama(
-#         model=MODEL,
-#         keep_alive="5m",
-#         # temperature=0.7,
-#         base_url=OLLAMA_HOST,
-#     )
-
-#     response = llm.invoke([
-#         SystemMessage(content="You are a translator."),
-#         HumanMessage(content=f"{text}\n\n---\n\nTranslate to English.  Provide ONLY the summary.  Clean up formatting, if needed.")
-#     ])
-
-#     return response.content
