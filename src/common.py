@@ -46,7 +46,7 @@ def colorize(color: int):
 def cprint(string: str, color: Colors):
     print_this = f'\033[1;3{color}m' + string + '\033[0m'
 
-    if os.getenv("DEBUG", True):
+    if os.getenv("DEBUG", False):
         print(print_this)
     else:
         pass

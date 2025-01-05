@@ -72,7 +72,6 @@ def hide_markdown_header_links():
 def cmp_header(APP_NAME: str):
     favicon = Image.open(os.path.join(STATIC_PATH, "favicon.ico"))
     st.set_page_config(
-        # page_title="DEBUG!" if os.getenv("DEBUG", False) else "NOS4A2",
         page_title=APP_NAME,
         page_icon=favicon,
         layout="wide",

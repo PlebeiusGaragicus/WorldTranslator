@@ -33,7 +33,7 @@ SHOW_MORE_BUTTON_COUNT = 4
 
 ################################################################################################
 def main_page():
-    print(">>> RERUN")
+    # cprint(">>> RERUN")
 
 
     favicon = Image.open(os.path.join(STATIC_PATH, "favicon.ico"))
@@ -135,7 +135,7 @@ def main_page():
 
 
 
-    if os.getenv("DEBUG"):
+    if os.getenv("DEBUG", False):
         # with st.popover(":orange[DEBUG]"):
         with st.sidebar:
             st.write("## articles")
