@@ -52,16 +52,11 @@ def main_page():
     if "selected_sources" not in st.session_state:
         st.session_state.selected_sources = {}
 
-    if "auto_translate" not in st.session_state:
-        st.session_state.auto_translate = False
-
-    if "max_articles" not in st.session_state:
-        st.session_state.max_articles = 2
-
     if "selected_feed" not in st.session_state:
         st.session_state.selected_feed = None
 
-    st.header("🗺️ :blue[World] :orange[-] :red[News] :orange[-] :green[Translator]", divider="rainbow")
+    # st.markdown("### 🗣️🤷")
+    st.header(":blue[World] :red[News] :green[Translator] 🗣️ 🤷 🌎", divider="rainbow")
 
     # Get unique countries from RSS_FEEDS
     countries = sorted(list(set(feed["country"] for feed in RSS_FEEDS)))
@@ -72,9 +67,9 @@ def main_page():
     # Display each country's feeds in a container
     for idx, country in enumerate(countries):
         with cols[idx % 3]:
-            with st.container(border=True):
-                st.subheader(country)
-                
+            with st.expander(country):
+                # st.subheader(country)
+
                 # Group feeds by feed_name for this country
                 country_feeds = [feed for feed in RSS_FEEDS if feed["country"] == country]
                 sources = {}
@@ -93,12 +88,13 @@ def main_page():
                         f"📰 {feed_name}",
                         key=f"btn_{country}_{feed_name}",
                         type="primary" if st.session_state.selected_feed == (country, feed_name) else "secondary",
+                        use_container_width=True
                     ):
                         # Update global selection
                         st.session_state.selected_feed = (country, feed_name)
                         # Get the feed URL
                         feed_url = next(feed['url'] for feed in RSS_FEEDS 
-                                     if feed['country'] == country and feed['feed_name'] == feed_name)
+                                    if feed['country'] == country and feed['feed_name'] == feed_name)
                         # Initialize articles for this feed if not exists
                         if feed_url not in st.session_state.articles_by_feed:
                             st.session_state.articles_by_feed[feed_url] = {}
@@ -106,9 +102,9 @@ def main_page():
                         st.session_state.articles = st.session_state.articles_by_feed[feed_url]
                         st.rerun()
 
-    with st.sidebar:
-        st.header(":orange[:material/settings:] :red[Settings]", divider="rainbow")
-        show_settings()
+
+    # with st.popover(":grey[Settings]"):
+    #     show_settings()
 
     # Update selected_sources based on selected_feed
     for country in st.session_state.selected_sources:
@@ -131,7 +127,8 @@ def main_page():
 
 
     if os.getenv("DEBUG"):
-        with st.popover(":orange[DEBUG]"):
+        # with st.popover(":orange[DEBUG]"):
+        with st.sidebar:
             st.write("## articles")
             st.write(st.session_state.get("articles", None))
             st.divider()
@@ -144,34 +141,6 @@ def main_page():
 
 
 
-
-
-
-
-################################################################################################
-# def scrape_articles(article_placeholder):
-#     with article_placeholder.container():
-#         selected_country = st.session_state.country
-#         selected_sources = st.session_state.selected_sources
-#         feed_urls = [source["url"] for source in RSS_FEEDS[selected_country] if source["name"] in selected_sources]
-    
-        
-#         articles = load_articles(feed_urls, max_articles=st.session_state.max_articles)
-        
-#         # Store articles in persistent storage with timestamp
-#         for article in articles:
-#             if article['link'] not in st.session_state.all_scraped_articles:
-#                 # Find matching source name from the feed URL
-#                 source_name = next(
-#                     (source["name"] for source in RSS_FEEDS[selected_country] 
-#                      if source["url"] == article.get("source")),  "Unknown Source"
-#                 )
-
-#                 st.session_state.all_scraped_articles[article['link']] = {
-#                     "article": article,
-#                     "timestamp": datetime.now(),
-#                     "source": source_name
-#                 }
 
 
 def show_available_sources():
@@ -226,22 +195,23 @@ def show_available_sources():
                 st.session_state.selected_sources[selected_country].discard(name)
 
 
-def show_settings():
-    # auto-translate toggle
-    st.toggle(
-        ":blue[Auto-Translate]",
-        key="auto_translate"
-    )
+# def show_settings():
+#     # auto-translate toggle
+#     st.toggle(
+#         ":blue[Auto-Translate]",
+#         key="auto_translate",
+#         value=st.session_state.get("auto_translate", False)
+#     )
 
-    # Number of articles to scrape per source
-    st.slider(
-        ":red[Number of articles to scrape per source]",
-        min_value=1,
-        max_value=20,
-        value=2,
-        step=1,
-        key="max_articles"
-    )
+#     # Number of articles to scrape per source
+#     st.number_input(
+#         ":red[Number of articles to scrape per source]",
+#         min_value=1,
+#         max_value=20,
+#         value=st.session_state.get("max_articles", 5),
+#         step=1,
+#         key="max_articles"
+#     )
 
 
 def show_articles():
@@ -290,7 +260,8 @@ def show_articles():
     # Load new articles for selected source
     current_time = datetime.now()
     try:
-        new_articles = load_articles(feed_url, max_articles=st.session_state.get("max_articles", 10))
+        # new_articles = load_articles(feed_url, max_articles=st.session_state.get("max_articles", 5))
+        new_articles = load_articles(feed_url, max_articles=20)
     except Exception as e:
         st.error(f"Failed to load articles: {str(e)}")
         return
@@ -327,7 +298,6 @@ def show_articles():
         article_url = article['link']
 
         with st.container(border=True):
-            st.markdown(f"### [{article['title']}]({article_url})")
 
             if article.get('translated_title', None) is None:
                 with st.spinner(":green[Translating Title...]"):
@@ -335,15 +305,16 @@ def show_articles():
             st.markdown(f"### :green[{article['translated_title']}]")
 
             st.caption(article.get('published', 'Unknown date'))
-            st.caption(f":blue[Description:] {article.get('description', 'No description available')}")
 
-            if article.get('translated_desc', None) is None:
-                with st.spinner(":green[Translating Description...]"):
-                    article['translated_desc'] = st.write_stream(translate_stream(article['description']))
-            else:
-                st.write(article['translated_desc'])
+            # if article.get('translated_desc', None) is None:
+            #     with st.spinner(":green[Translating Description...]"):
+            #         article['translated_desc'] = st.write_stream(translate_stream(article['description']))
+            # else:
+            #     st.write(article['translated_desc'])
 
             with st.popover(":grey[Original Content]"):
+                st.markdown(f"### [{article['title']}]({article_url})")
+                st.caption(f":blue[Description:] {article.get('description', 'No description available')}")
                 st.markdown("### :grey[Original Content]")
 
                 # if we haven't scraped the content yet, scrape it
@@ -355,17 +326,17 @@ def show_articles():
                 st.caption(article['content'])
 
             if article['translated'] is None:
-                if st.session_state.auto_translate:
+                # if st.session_state.get("auto_translate", False):
+                #     with st.spinner(":green[Translating...]"):
+                #         article['translated'] = st.write_stream(translate_stream(article['content']))
+
+                # else:
+                if st.button(":rainbow[Translate Article]", icon="🗣️", key=f"translate_{article['source']}{article_url}"):
                     with st.spinner(":green[Translating...]"):
                         article['translated'] = st.write_stream(translate_stream(article['content']))
-
-                else:
-                    if st.button(":rainbow[Translate Article]", icon="🗣️", key=f"translate_{article['source']}{article_url}"):
-                        with st.spinner(":green[Translating...]"):
-                            article['translated'] = st.write_stream(translate_stream(article['content']))
-                            st.rerun()
+                        st.rerun()
 
             else:
-                with st.container(border=True):
-                    st.markdown("### :orange[Translated Content]")
-                    st.write(article['translated'])
+                # with st.container(border=True):
+                st.markdown("### :orange[Translated Content]")
+                st.write(article['translated'])

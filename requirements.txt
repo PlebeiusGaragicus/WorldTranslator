@@ -4,3 +4,4 @@ lxml_html_clean
 readability-lxml
 langchain
 langchain_ollama
+# python-dotenv

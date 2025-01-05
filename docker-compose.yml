@@ -22,7 +22,7 @@ services:
       - DEBUG=${DEBUG:-0}
 
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:${STREAMLIT_PORT}/_stcore/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8501/_stcore/health"]
       interval: 30s
       timeout: 10s
       retries: 3
