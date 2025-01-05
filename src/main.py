@@ -70,10 +70,9 @@ def main_page():
     # Display each country's feeds in a container
     for idx, country in enumerate(countries):
         with cols[idx % 3]:
-            color = "grey"
-            if st.session_state.selected_feed and st.session_state.selected_feed[0] == country:
-                color = "orange"
-            with st.expander(f":{color}[{country}]"):
+            # color = "grey"
+            color = "orange" if st.session_state.selected_feed and st.session_state.selected_feed[0] == country else "grey"
+            with st.expander(f":{color}[{country}]", expanded=True if color == "orange" else False):
                 # st.subheader(country)
 
                 # Group feeds by feed_name for this country
@@ -94,8 +93,9 @@ def main_page():
                         # f"📰 {feed_name}",
                         f"{feed_name}",
                         key=f"btn_{country}_{feed_name}",
-                        icon="🔴" if st.session_state.selected_feed == (country, feed_name) else "⭕️",
-                        type="primary" if st.session_state.selected_feed == (country, feed_name) else "tertiary",
+                        # icon="🔴" if st.session_state.selected_feed == (country, feed_name) else "⭕️",
+                        icon=":material/radio_button_checked:" if st.session_state.selected_feed == (country, feed_name) else ":material/radio_button_unchecked:",
+                        type="secondary" if st.session_state.selected_feed == (country, feed_name) else "tertiary",
                         # use_container_width=True
                     ):
                         # Update global selection
